@@ -6,6 +6,11 @@ namespace DarkerWeatherNights;
 
 public sealed class DarkerWeatherNightsSettings
 {
+    [SynthesisSettingName("Weather Selection")]
+    [DefaultValue(WeatherInclusionMode.Vanilla)]
+    [SynthesisTooltip("Choose whether to adjust every weather or vanilla only (recommended). Mods like LUX add custom weathers that are not supposed to be altered.")]
+    public WeatherInclusionMode WeatherInclusion { get; set; } = WeatherInclusionMode.Vanilla;
+
     [SynthesisSettingName("PNAM - Cloud Colors (Night)")]
     public PNAMSettings PNAM { get; set; } = new();
 
@@ -179,5 +184,14 @@ public sealed class DarkerWeatherNightsSettings
         {
             ValidateRange(VolumetricLightingNightMultiplier, $"{prefix}.{nameof(VolumetricLightingNightMultiplier)}");
         }
+    }
+
+    public enum WeatherInclusionMode
+    {
+        [Description("All weathers")]
+        All,
+
+        [Description("Skyrim + DLCs")]
+        Vanilla,
     }
 }

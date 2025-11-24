@@ -15,6 +15,12 @@ internal sealed class WeatherProcessor
     private readonly IPatcherState<ISkyrimMod, ISkyrimModGetter> _state;
     private readonly DarkerWeatherNightsSettings _settings;
     private readonly HashSet<FormKey> _scaledVolumetricLights = new();
+    private static readonly HashSet<ModKey> VanillaWeatherModKeys = new()
+    {
+        ModKey.FromNameAndExtension("Skyrim.esm"),
+        ModKey.FromNameAndExtension("Dawnguard.esm"),
+        ModKey.FromNameAndExtension("Dragonborn.esm"),
+    };
 
     private int _colorChanges;
     private int _weatherChanges;
@@ -31,6 +37,11 @@ internal sealed class WeatherProcessor
     {
         foreach (var weatherGetter in _state.LoadOrder.PriorityOrder.Weather().WinningOverrides())
         {
+            if (ShouldSkipWeather(weatherGetter))
+            {
+                continue;
+            }
+
             Weather? patchWeather = null;
             Weather EnsurePatchWeather()
             {
@@ -53,6 +64,30 @@ internal sealed class WeatherProcessor
 
         Console.WriteLine(
             $"Darker Weather Nights: Weather records changed: {_weatherChanges}. Color fields adjusted: {_colorChanges}.");
+    }
+
+    private bool ShouldSkipWeather(IWeatherGetter weather)
+    {
+        var editorId = weather.EditorID;
+        if (!string.IsNullOrEmpty(editorId))
+        {
+            if (string.Equals(editorId, "WorldMapWeather", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (editorId.StartsWith("FX", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        if (_settings.WeatherInclusion == DarkerWeatherNightsSettings.WeatherInclusionMode.Vanilla)
+        {
+            return !VanillaWeatherModKeys.Contains(weather.FormKey.ModKey);
+        }
+
+        return false;
     }
 
     private bool ScaleCloudLayers(IWeatherGetter source, Func<Weather> ensureDestination)
