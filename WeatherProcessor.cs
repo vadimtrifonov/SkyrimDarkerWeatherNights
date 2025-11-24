@@ -66,7 +66,7 @@ internal sealed class WeatherProcessor
                 continue;
             }
 
-            if (ScaleWeatherColorNight(srcLayer.Colors, dstLayer.Colors, _settings.CloudColorNightMultiplier))
+            if (ScaleWeatherColorNight(srcLayer.Colors, dstLayer.Colors, _settings.PNAMNightMultiplier))
             {
                 changed = true;
             }
@@ -79,17 +79,17 @@ internal sealed class WeatherProcessor
     {
         var changed = false;
 
-        changed |= ScaleWeatherColorNight(source.SkyUpperColor, destination.SkyUpperColor, _settings.SkyUpperNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.FogNearColor, destination.FogNearColor, _settings.FogNearNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.AmbientColor, destination.AmbientColor, _settings.AmbientNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SunlightColor, destination.SunlightColor, _settings.SunlightNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SkyLowerColor, destination.SkyLowerColor, _settings.SkyLowerNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.HorizonColor, destination.HorizonColor, _settings.HorizonNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.EffectLightingColor, destination.EffectLightingColor, _settings.EffectLightingNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.FogFarColor, destination.FogFarColor, _settings.FogFarNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SkyStaticsColor, destination.SkyStaticsColor, _settings.SkyStaticsNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.WaterMultiplierColor, destination.WaterMultiplierColor, _settings.WaterMultiplierNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.MoonGlareColor, destination.MoonGlareColor, _settings.MoonGlareNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.SkyUpperColor, destination.SkyUpperColor, _settings.NAM0SkyUpperNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.FogNearColor, destination.FogNearColor, _settings.NAM0FogNearNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.AmbientColor, destination.AmbientColor, _settings.NAM0AmbientNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.SunlightColor, destination.SunlightColor, _settings.NAM0SunlightNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.SkyLowerColor, destination.SkyLowerColor, _settings.NAM0SkyLowerNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.HorizonColor, destination.HorizonColor, _settings.NAM0HorizonNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.EffectLightingColor, destination.EffectLightingColor, _settings.NAM0EffectLightingNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.FogFarColor, destination.FogFarColor, _settings.NAM0FogFarNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.SkyStaticsColor, destination.SkyStaticsColor, _settings.NAM0SkyStaticsNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.WaterMultiplierColor, destination.WaterMultiplierColor, _settings.NAM0WaterMultiplierNightMultiplier);
+        changed |= ScaleWeatherColorNight(source.MoonGlareColor, destination.MoonGlareColor, _settings.NAM0MoonGlareNightMultiplier);
 
         return changed;
     }
@@ -114,37 +114,37 @@ internal sealed class WeatherProcessor
         changed |= ScaleColorByFactor(
             srcNight.DirectionalXPlus,
             dstNight.DirectionalXPlus,
-            _settings.AmbientSidesNightMultiplier,
+            _settings.DALCSidesNightMultiplier,
             color => dstNight.DirectionalXPlus = color);
         changed |= ScaleColorByFactor(
             srcNight.DirectionalXMinus,
             dstNight.DirectionalXMinus,
-            _settings.AmbientSidesNightMultiplier,
+            _settings.DALCSidesNightMultiplier,
             color => dstNight.DirectionalXMinus = color);
         changed |= ScaleColorByFactor(
             srcNight.DirectionalYPlus,
             dstNight.DirectionalYPlus,
-            _settings.AmbientSidesNightMultiplier,
+            _settings.DALCSidesNightMultiplier,
             color => dstNight.DirectionalYPlus = color);
         changed |= ScaleColorByFactor(
             srcNight.DirectionalYMinus,
             dstNight.DirectionalYMinus,
-            _settings.AmbientSidesNightMultiplier,
+            _settings.DALCSidesNightMultiplier,
             color => dstNight.DirectionalYMinus = color);
         changed |= ScaleColorByFactor(
             srcNight.DirectionalZMinus,
             dstNight.DirectionalZMinus,
-            _settings.AmbientDownNightMultiplier,
+            _settings.DALCZNegativeNightMultiplier,
             color => dstNight.DirectionalZMinus = color);
         changed |= ScaleColorByFactor(
             srcNight.DirectionalZPlus,
             dstNight.DirectionalZPlus,
-            _settings.AmbientUpNightMultiplier,
+            _settings.DALCZPositiveNightMultiplier,
             color => dstNight.DirectionalZPlus = color);
         changed |= ScaleColorByFactor(
             srcNight.Specular,
             dstNight.Specular,
-            _settings.AmbientSpecularNightMultiplier,
+            _settings.DALCSpecularNightMultiplier,
             color => dstNight.Specular = color);
 
         return changed;
@@ -179,9 +179,9 @@ internal sealed class WeatherProcessor
             return false;
         }
 
-        var scaledR = ScaleChannel(r, _settings.VolumetricLightingNightMultiplier);
-        var scaledG = ScaleChannel(g, _settings.VolumetricLightingNightMultiplier);
-        var scaledB = ScaleChannel(b, _settings.VolumetricLightingNightMultiplier);
+        var scaledR = ScaleChannel(r, _settings.HNAMVolumetricLightingNightMultiplier);
+        var scaledG = ScaleChannel(g, _settings.HNAMVolumetricLightingNightMultiplier);
+        var scaledB = ScaleChannel(b, _settings.HNAMVolumetricLightingNightMultiplier);
 
         if (scaledR == r && scaledG == g && scaledB == b)
         {
