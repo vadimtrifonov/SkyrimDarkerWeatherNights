@@ -31,16 +31,21 @@ internal sealed class WeatherProcessor
     {
         foreach (var weatherGetter in _state.LoadOrder.PriorityOrder.Weather().WinningOverrides())
         {
-            var patchWeather = _state.PatchMod.Weathers.GetOrAddAsOverride(weatherGetter);
+            Weather? patchWeather = null;
+            Weather EnsurePatchWeather()
+            {
+                patchWeather ??= _state.PatchMod.Weathers.GetOrAddAsOverride(weatherGetter);
+                return patchWeather;
+            }
+
             var beforeColors = _colorChanges;
-            var recordChanged = false;
+            var weatherRecordChanged = false;
+            weatherRecordChanged |= ScaleCloudLayers(weatherGetter, EnsurePatchWeather);
+            weatherRecordChanged |= ScaleNam0WeatherColors(weatherGetter, EnsurePatchWeather);
+            weatherRecordChanged |= ScaleDirectionalAmbientLighting(weatherGetter, EnsurePatchWeather);
+            var volumetricChanged = ScaleVolumetricLighting(weatherGetter);
 
-            recordChanged |= ScaleCloudLayers(weatherGetter, patchWeather);
-            recordChanged |= ScaleNam0WeatherColors(weatherGetter, patchWeather);
-            recordChanged |= ScaleDirectionalAmbientLighting(weatherGetter, patchWeather);
-            recordChanged |= ScaleVolumetricLighting(weatherGetter);
-
-            if (recordChanged || beforeColors != _colorChanges)
+            if (weatherRecordChanged || volumetricChanged || beforeColors != _colorChanges)
             {
                 _weatherChanges++;
             }
@@ -50,62 +55,95 @@ internal sealed class WeatherProcessor
             $"Darker Weather Nights: Weather records changed: {_weatherChanges}. Color fields adjusted: {_colorChanges}.");
     }
 
-    private bool ScaleCloudLayers(IWeatherGetter source, Weather destination)
+    private bool ScaleCloudLayers(IWeatherGetter source, Func<Weather> ensureDestination)
     {
         var srcClouds = source.Clouds;
-        var dstClouds = destination.Clouds;
-        var count = Math.Min(srcClouds.Count, dstClouds.Length);
         var changed = false;
 
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < srcClouds.Count; i++)
         {
             var srcLayer = srcClouds[i];
-            var dstLayer = dstClouds[i];
-            if (srcLayer?.Colors == null || dstLayer?.Colors == null)
+            if (srcLayer?.Colors == null)
             {
                 continue;
             }
 
-            if (ScaleWeatherColorNight(srcLayer.Colors, dstLayer.Colors, _settings.PNAM.NightMultiplier))
-            {
-                changed = true;
-            }
+            var index = i;
+            changed |= ScaleWeatherColorNight(
+                srcLayer.Colors,
+                () =>
+                {
+                    var dstClouds = ensureDestination().Clouds;
+                    if (index >= dstClouds.Length)
+                    {
+                        return null;
+                    }
+
+                    return dstClouds[index]?.Colors;
+                },
+                _settings.PNAM.NightMultiplier);
         }
 
         return changed;
     }
 
-    private bool ScaleNam0WeatherColors(IWeatherGetter source, Weather destination)
+    private bool ScaleNam0WeatherColors(IWeatherGetter source, Func<Weather> ensureDestination)
     {
         var changed = false;
 
-        changed |= ScaleWeatherColorNight(source.SkyUpperColor, destination.SkyUpperColor, _settings.NAM0.SkyUpperNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.FogNearColor, destination.FogNearColor, _settings.NAM0.FogNearNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.AmbientColor, destination.AmbientColor, _settings.NAM0.AmbientNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SunlightColor, destination.SunlightColor, _settings.NAM0.SunlightNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SkyLowerColor, destination.SkyLowerColor, _settings.NAM0.SkyLowerNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.HorizonColor, destination.HorizonColor, _settings.NAM0.HorizonNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.EffectLightingColor, destination.EffectLightingColor, _settings.NAM0.EffectLightingNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.FogFarColor, destination.FogFarColor, _settings.NAM0.FogFarNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.SkyStaticsColor, destination.SkyStaticsColor, _settings.NAM0.SkyStaticsNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.WaterMultiplierColor, destination.WaterMultiplierColor, _settings.NAM0.WaterMultiplierNightMultiplier);
-        changed |= ScaleWeatherColorNight(source.MoonGlareColor, destination.MoonGlareColor, _settings.NAM0.MoonGlareNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.SkyUpperColor,
+            () => ensureDestination().SkyUpperColor,
+            _settings.NAM0.SkyUpperNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.FogNearColor,
+            () => ensureDestination().FogNearColor,
+            _settings.NAM0.FogNearNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.AmbientColor,
+            () => ensureDestination().AmbientColor,
+            _settings.NAM0.AmbientNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.SunlightColor,
+            () => ensureDestination().SunlightColor,
+            _settings.NAM0.SunlightNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.SkyLowerColor,
+            () => ensureDestination().SkyLowerColor,
+            _settings.NAM0.SkyLowerNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.HorizonColor,
+            () => ensureDestination().HorizonColor,
+            _settings.NAM0.HorizonNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.EffectLightingColor,
+            () => ensureDestination().EffectLightingColor,
+            _settings.NAM0.EffectLightingNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.FogFarColor,
+            () => ensureDestination().FogFarColor,
+            _settings.NAM0.FogFarNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.SkyStaticsColor,
+            () => ensureDestination().SkyStaticsColor,
+            _settings.NAM0.SkyStaticsNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.WaterMultiplierColor,
+            () => ensureDestination().WaterMultiplierColor,
+            _settings.NAM0.WaterMultiplierNightMultiplier);
+        changed |= ScaleWeatherColorNight(
+            source.MoonGlareColor,
+            () => ensureDestination().MoonGlareColor,
+            _settings.NAM0.MoonGlareNightMultiplier);
 
         return changed;
     }
 
-    private bool ScaleDirectionalAmbientLighting(IWeatherGetter source, Weather destination)
+    private bool ScaleDirectionalAmbientLighting(IWeatherGetter source, Func<Weather> ensureDestination)
     {
         var srcColors = source.DirectionalAmbientLightingColors;
-        var dstColors = destination.DirectionalAmbientLightingColors;
-        if (srcColors == null || dstColors == null)
-        {
-            return false;
-        }
-
-        var srcNight = srcColors.Night;
-        var dstNight = dstColors.Night;
-        if (srcNight == null || dstNight == null)
+        var srcNight = srcColors?.Night;
+        if (srcNight == null)
         {
             return false;
         }
@@ -113,39 +151,102 @@ internal sealed class WeatherProcessor
         var changed = false;
         changed |= ScaleColorByFactor(
             srcNight.DirectionalXPlus,
-            dstNight.DirectionalXPlus,
             _settings.DALC.SidesNightMultiplier,
-            color => dstNight.DirectionalXPlus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalXPlus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.DirectionalXMinus,
-            dstNight.DirectionalXMinus,
             _settings.DALC.SidesNightMultiplier,
-            color => dstNight.DirectionalXMinus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalXMinus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.DirectionalYPlus,
-            dstNight.DirectionalYPlus,
             _settings.DALC.SidesNightMultiplier,
-            color => dstNight.DirectionalYPlus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalYPlus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.DirectionalYMinus,
-            dstNight.DirectionalYMinus,
             _settings.DALC.SidesNightMultiplier,
-            color => dstNight.DirectionalYMinus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalYMinus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.DirectionalZMinus,
-            dstNight.DirectionalZMinus,
             _settings.DALC.ZNegativeNightMultiplier,
-            color => dstNight.DirectionalZMinus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalZMinus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.DirectionalZPlus,
-            dstNight.DirectionalZPlus,
             _settings.DALC.ZPositiveNightMultiplier,
-            color => dstNight.DirectionalZPlus = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.DirectionalZPlus = color;
+                return true;
+            });
         changed |= ScaleColorByFactor(
             srcNight.Specular,
-            dstNight.Specular,
             _settings.DALC.SpecularNightMultiplier,
-            color => dstNight.Specular = color);
+            color =>
+            {
+                var dstNight = ensureDestination().DirectionalAmbientLightingColors?.Night;
+                if (dstNight == null)
+                {
+                    return false;
+                }
+
+                dstNight.Specular = color;
+                return true;
+            });
 
         return changed;
     }
@@ -179,11 +280,13 @@ internal sealed class WeatherProcessor
             return false;
         }
 
-        var scaledR = ScaleChannel(r, _settings.HNAM.VolumetricLightingNightMultiplier);
-        var scaledG = ScaleChannel(g, _settings.HNAM.VolumetricLightingNightMultiplier);
-        var scaledB = ScaleChannel(b, _settings.HNAM.VolumetricLightingNightMultiplier);
+        var scaledR = ScaleVolumetricChannel(r, _settings.HNAM.VolumetricLightingNightMultiplier);
+        var scaledG = ScaleVolumetricChannel(g, _settings.HNAM.VolumetricLightingNightMultiplier);
+        var scaledB = ScaleVolumetricChannel(b, _settings.HNAM.VolumetricLightingNightMultiplier);
 
-        if (scaledR == r && scaledG == g && scaledB == b)
+        if (AreVolumetricChannelsEqual(scaledR, r) &&
+            AreVolumetricChannelsEqual(scaledG, g) &&
+            AreVolumetricChannelsEqual(scaledB, b))
         {
             return false;
         }
@@ -198,17 +301,33 @@ internal sealed class WeatherProcessor
         return true;
     }
 
-    private bool ScaleWeatherColorNight(IWeatherColorGetter? source, WeatherColor? destination, double multiplier)
+    private bool ScaleWeatherColorNight(
+        IWeatherColorGetter? source,
+        Func<WeatherColor?> getDestination,
+        double multiplier)
     {
-        if (source == null || destination == null)
+        if (source == null)
         {
             return false;
         }
 
-        return ScaleColorByFactor(source.Night, destination.Night, multiplier, color => destination.Night = color);
+        return ScaleColorByFactor(
+            source.Night,
+            multiplier,
+            color =>
+            {
+                var destination = getDestination();
+                if (destination == null)
+                {
+                    return false;
+                }
+
+                destination.Night = color;
+                return true;
+            });
     }
 
-    private bool ScaleColorByFactor(Color baseline, Color current, double multiplier, Action<Color> apply)
+    private bool ScaleColorByFactor(Color baseline, double multiplier, Func<Color, bool> apply)
     {
         if (!HasColorData(baseline))
         {
@@ -216,12 +335,16 @@ internal sealed class WeatherProcessor
         }
 
         var scaled = ScaleColor(baseline, multiplier);
-        if (ColorsEqual(scaled, current))
+        if (ColorsEqual(scaled, baseline))
         {
             return false;
         }
 
-        apply(scaled);
+        if (!apply(scaled))
+        {
+            return false;
+        }
+
         _colorChanges++;
         return true;
     }
@@ -264,25 +387,41 @@ internal sealed class WeatherProcessor
 
     private static bool TryGetVolumetricColorChannels(
         IVolumetricLightingGetter source,
-        out byte r,
-        out byte g,
-        out byte b)
+        out float r,
+        out float g,
+        out float b)
     {
         if (!source.ColorR.HasValue || !source.ColorG.HasValue || !source.ColorB.HasValue)
         {
-            r = g = b = 0;
+            r = g = b = 0f;
             return false;
         }
 
-        r = ClampByte(source.ColorR.Value);
-        g = ClampByte(source.ColorG.Value);
-        b = ClampByte(source.ColorB.Value);
+        r = source.ColorR.Value;
+        g = source.ColorG.Value;
+        b = source.ColorB.Value;
         return true;
     }
 
-    private static bool IsAchromatic(byte r, byte g, byte b)
+    private static bool IsAchromatic(float r, float g, float b)
     {
-        return (r == 0 && g == 0 && b == 0) ||
-               (r == 255 && g == 255 && b == 255);
+        return (IsApproximately(r, 0f) && IsApproximately(g, 0f) && IsApproximately(b, 0f)) ||
+               (IsApproximately(r, 255f) && IsApproximately(g, 255f) && IsApproximately(b, 255f));
+    }
+
+    private static bool IsApproximately(float value, float target)
+    {
+        return Math.Abs(value - target) <= 0.01f;
+    }
+
+    private static float ScaleVolumetricChannel(float value, double multiplier)
+    {
+        var scaled = value * multiplier;
+        return (float)Math.Clamp(scaled, 0f, 255f);
+    }
+
+    private static bool AreVolumetricChannelsEqual(float left, float right)
+    {
+        return IsApproximately(left, right);
     }
 }
