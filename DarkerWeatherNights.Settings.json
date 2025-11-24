@@ -1,0 +1,27 @@
+{
+  "PNAM": {
+    "NightMultiplier": 0.5
+  },
+  "NAM0": {
+    "SkyUpperNightMultiplier": 0.5,
+    "FogNearNightMultiplier": 0.5,
+    "AmbientNightMultiplier": 0.5,
+    "SunlightNightMultiplier": 0.5,
+    "SkyLowerNightMultiplier": 0.5,
+    "HorizonNightMultiplier": 0.5,
+    "EffectLightingNightMultiplier": 1.0,
+    "FogFarNightMultiplier": 0.5,
+    "SkyStaticsNightMultiplier": 0.5,
+    "WaterMultiplierNightMultiplier": 0.5,
+    "MoonGlareNightMultiplier": 0.5
+  },
+  "DALC": {
+    "SidesNightMultiplier": 0.5,
+    "ZNegativeNightMultiplier": 0.5,
+    "ZPositiveNightMultiplier": 0.5,
+    "SpecularNightMultiplier": 0.5
+  },
+  "HNAM": {
+    "VolumetricLightingNightMultiplier": 0.5
+  }
+}

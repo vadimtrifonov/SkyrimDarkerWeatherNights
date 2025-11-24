@@ -51,40 +51,40 @@ public sealed class DarkerWeatherNightsSettings
     public sealed class Nam0Settings
     {
         [Range(0, 1)]
-        [DefaultValue(0.33)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Sky-Upper")]
         [SynthesisTooltip("Darkens the top of the skydome and softens the faint night air-glow.")]
-        public double SkyUpperNightMultiplier { get; set; } = 0.33;
+        public double SkyUpperNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
-        [DefaultValue(0.33)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Fog Near")]
         [SynthesisTooltip("Scales local atmospheric haze when near fog is active (align with Fog Far).")]
-        public double FogNearNightMultiplier { get; set; } = 0.33;
+        public double FogNearNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
-        [DefaultValue(0.25)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Ambient")]
         [SynthesisTooltip("Global non-directional base light outdoors; keep in balance with Sunlight.")]
-        public double AmbientNightMultiplier { get; set; } = 0.25;
+        public double AmbientNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
-        [DefaultValue(0.25)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Sunlight")]
         [SynthesisTooltip("Night directional light (moonlight); multiplied by the image-space sun scale.")]
-        public double SunlightNightMultiplier { get; set; } = 0.25;
+        public double SunlightNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
-        [DefaultValue(0.33)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Sky-Lower")]
         [SynthesisTooltip("Lower sky color near the horizon (align with Horizon and Fog Far).")]
-        public double SkyLowerNightMultiplier { get; set; } = 0.33;
+        public double SkyLowerNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
-        [DefaultValue(0.33)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Horizon")]
         [SynthesisTooltip("Thin horizon ring that sets the skyline seam color (align with Sky Lower/Fog Far).")]
-        public double HorizonNightMultiplier { get; set; } = 0.33;
+        public double HorizonNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
         [DefaultValue(1.0)]
@@ -93,10 +93,10 @@ public sealed class DarkerWeatherNightsSettings
         public double EffectLightingNightMultiplier { get; set; } = 1.0;
 
         [Range(0, 1)]
-        [DefaultValue(0.33)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Fog Far")]
         [SynthesisTooltip("Distant haze/terrain silhouette tint that also affects water reflections.")]
-        public double FogFarNightMultiplier { get; set; } = 0.33;
+        public double FogFarNightMultiplier { get; set; } = 0.50;
 
         [Range(0, 1)]
         [DefaultValue(0.50)]
@@ -170,10 +170,10 @@ public sealed class DarkerWeatherNightsSettings
     public sealed class HNAMSettings
     {
         [Range(0, 1)]
-        [DefaultValue(0.10)]
+        [DefaultValue(0.50)]
         [SynthesisSettingName("Volumetric Lighting Colors")]
         [SynthesisTooltip("Colors used by the referenced VOLI record at night.")]
-        public double VolumetricLightingNightMultiplier { get; set; } = 0.10;
+        public double VolumetricLightingNightMultiplier { get; set; } = 0.50;
 
         public void Validate(string prefix)
         {
