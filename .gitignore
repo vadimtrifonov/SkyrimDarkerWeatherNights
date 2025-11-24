@@ -1,0 +1,13 @@
+# Build artifacts
+bin/
+obj/
+
+# IDE cruft
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Generated settings/state
+*.SynthSettings.json
+*.SynthState.json
