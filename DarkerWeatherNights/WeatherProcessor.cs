@@ -441,7 +441,7 @@ internal sealed class WeatherProcessor
     private static bool IsAchromatic(float r, float g, float b)
     {
         return (IsApproximately(r, 0f) && IsApproximately(g, 0f) && IsApproximately(b, 0f)) ||
-               (IsApproximately(r, 255f) && IsApproximately(g, 255f) && IsApproximately(b, 255f));
+               (IsApproximately(r, 1f) && IsApproximately(g, 1f) && IsApproximately(b, 1f));
     }
 
     private static bool IsApproximately(float value, float target)

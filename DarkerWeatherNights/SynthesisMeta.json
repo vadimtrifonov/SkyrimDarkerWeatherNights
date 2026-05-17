@@ -1,0 +1,13 @@
+{
+  "Nickname": "Darker Weather Nights",
+  "Visibility": "Visible",
+  "OneLineDescription": "Darkens night-time Skyrim weather colors.",
+  "LongDescription": "Scales night-time WTHR and referenced VOLI color values using configurable multipliers.",
+  "PreferredAutoVersioning": "Default",
+  "RequiredMods": [],
+  "TargetedReleases": [
+    "SkyrimSE",
+    "SkyrimVR",
+    "SkyrimSEGog"
+  ]
+}

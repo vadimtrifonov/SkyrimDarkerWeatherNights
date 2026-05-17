@@ -25,4 +25,4 @@ It does not touch day/dawn/dusk values, image spaces, interior lighting, or nonâ
 ## Compatibility
 
 - Compatible with most weather mods; tested with Azurite Weathers and Obsidian Weathers.
-- Default settings change only vanilla weather records, avoiding custom weathers from mods like LUX.
+- Default settings change only vanilla weather records, avoiding custom weathers from mods like Lux.
