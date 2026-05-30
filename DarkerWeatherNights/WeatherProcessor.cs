@@ -23,6 +23,7 @@ internal sealed class WeatherProcessor
     };
 
     private int _colorChanges;
+    private int _fogDistanceChanges;
     private int _weatherChanges;
 
     public WeatherProcessor(
@@ -54,6 +55,7 @@ internal sealed class WeatherProcessor
             weatherRecordChanged |= ScaleCloudLayers(weatherGetter, EnsurePatchWeather);
             weatherRecordChanged |= ScaleNam0WeatherColors(weatherGetter, EnsurePatchWeather);
             weatherRecordChanged |= ScaleDirectionalAmbientLighting(weatherGetter, EnsurePatchWeather);
+            weatherRecordChanged |= ScaleFogDistances(weatherGetter, EnsurePatchWeather);
             var volumetricChanged = ScaleVolumetricLighting(weatherGetter);
 
             if (weatherRecordChanged || volumetricChanged || beforeColors != _colorChanges)
@@ -63,7 +65,7 @@ internal sealed class WeatherProcessor
         }
 
         Console.WriteLine(
-            $"Darker Weather Nights: Weather records changed: {_weatherChanges}. Color fields adjusted: {_colorChanges}.");
+            $"Darker Weather Nights: Weather records changed: {_weatherChanges}. Color fields adjusted: {_colorChanges}. Fog distance fields adjusted: {_fogDistanceChanges}.");
     }
 
     private bool ShouldSkipWeather(IWeatherGetter weather)
@@ -336,6 +338,30 @@ internal sealed class WeatherProcessor
         return true;
     }
 
+    private bool ScaleFogDistances(IWeatherGetter source, Func<Weather> ensureDestination)
+    {
+        var changed = false;
+
+        changed |= ScaleFogDistanceByFactor(
+            source.FogDistanceNightNear,
+            _settings.FNAM.FogDistanceNightNearMultiplier,
+            value =>
+            {
+                ensureDestination().FogDistanceNightNear = value;
+                return true;
+            });
+        changed |= ScaleFogDistanceByFactor(
+            source.FogDistanceNightFar,
+            _settings.FNAM.FogDistanceNightFarMultiplier,
+            value =>
+            {
+                ensureDestination().FogDistanceNightFar = value;
+                return true;
+            });
+
+        return changed;
+    }
+
     private bool ScaleWeatherColorNight(
         IWeatherColorGetter? source,
         Func<WeatherColor?> getDestination,
@@ -381,6 +407,23 @@ internal sealed class WeatherProcessor
         }
 
         _colorChanges++;
+        return true;
+    }
+
+    private bool ScaleFogDistanceByFactor(float baseline, double multiplier, Func<float, bool> apply)
+    {
+        var scaled = (float)(baseline * multiplier);
+        if (scaled == baseline)
+        {
+            return false;
+        }
+
+        if (!apply(scaled))
+        {
+            return false;
+        }
+
+        _fogDistanceChanges++;
         return true;
     }
 

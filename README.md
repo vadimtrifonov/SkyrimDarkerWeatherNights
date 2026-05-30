@@ -1,7 +1,7 @@
 
 # Darker Weather Nights
 
-Darker Weather Nights is a Synthesis patcher for Skyrim SE/AE/VR that darkens night-time weather by scaling every relevant color field. It reproduces the behavior of [Darker Weather Nights - xEdit Script](https://www.nexusmods.com/skyrimspecialedition/mods/164521).
+Darker Weather Nights is a Synthesis patcher for Skyrim SE/AE/VR that darkens night-time weather by scaling every relevant color field and night fog distance values. It reproduces the behavior of [Darker Weather Nights - xEdit Script](https://www.nexusmods.com/skyrimspecialedition/mods/164521).
 
 ## Problem it solves
 
@@ -9,12 +9,13 @@ Typically, “darker nights” mods uniformly reduce Image Space brightness, whi
 
 ## How it works
 
-It scales the RGB values in Night subtrees of the WTHR (Weather) and VOLI (Volumetric Lighting) records using configurable multipliers.
+It scales the RGB values in night subtrees of the WTHR (Weather) and VOLI (Volumetric Lighting) records, plus FNAM (Fog Distance), using configurable multipliers.
 
 - PNAM - Cloud Colors (night): darker overcast/cloud layers.
 - NAM0 - Weather Colors (night): sky upper/lower, horizon ring, ambient, sunlight (moonlight), fog near/far, effect lighting, sky statics, water brightness, moon glare.
 - DALC - Directional Ambient Lighting Colors (night): lateral fill (sides), downward sky ambient (Z‑), upward ground bounce (Z+), ambient specular.
 - HNAM - Volumetric Lighting (night reference colors).
+- FNAM - Fog Distance (night).
 
 It does not touch day/dawn/dusk values, image spaces, interior lighting, or non‑weather/volumetric lighting records.
 

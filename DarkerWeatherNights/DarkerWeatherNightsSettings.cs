@@ -23,12 +23,16 @@ public sealed class DarkerWeatherNightsSettings
     [SynthesisSettingName("HNAM - Volumetric Lighting (Night)")]
     public HNAMSettings HNAM { get; set; } = new();
 
+    [SynthesisSettingName("FNAM - Fog Distance (Night)")]
+    public FNAMSettings FNAM { get; set; } = new();
+
     public void Validate()
     {
         PNAM.Validate(nameof(PNAM));
         NAM0.Validate(nameof(NAM0));
         DALC.Validate(nameof(DALC));
         HNAM.Validate(nameof(HNAM));
+        FNAM.Validate(nameof(FNAM));
     }
 
     private static void ValidateRange(double value, string name)
@@ -36,6 +40,14 @@ public sealed class DarkerWeatherNightsSettings
         if (value < 0d || value > 1d)
         {
             throw new ValidationException($"{name} must be between 0 and 1 (inclusive).");
+        }
+    }
+
+    private static void ValidateNonNegative(double value, string name)
+    {
+        if (!double.IsFinite(value) || value < 0d)
+        {
+            throw new ValidationException($"{name} must be greater than or equal to 0.");
         }
     }
 
@@ -183,6 +195,27 @@ public sealed class DarkerWeatherNightsSettings
         public void Validate(string prefix)
         {
             ValidateRange(VolumetricLightingNightMultiplier, $"{prefix}.{nameof(VolumetricLightingNightMultiplier)}");
+        }
+    }
+
+    public sealed class FNAMSettings
+    {
+        [Range(0, double.MaxValue)]
+        [DefaultValue(1.0)]
+        [SynthesisSettingName("Fog Distance Night Near")]
+        [SynthesisTooltip("Local night fog start distance multiplier. 1 leaves the baseline unchanged; 0.5 halves it; 2 doubles it.")]
+        public double FogDistanceNightNearMultiplier { get; set; } = 1.0;
+
+        [Range(0, double.MaxValue)]
+        [DefaultValue(1.0)]
+        [SynthesisSettingName("Fog Distance Night Far")]
+        [SynthesisTooltip("Distant night fog end distance multiplier. 1 leaves the baseline unchanged; 0.5 halves it; 2 doubles it.")]
+        public double FogDistanceNightFarMultiplier { get; set; } = 1.0;
+
+        public void Validate(string prefix)
+        {
+            ValidateNonNegative(FogDistanceNightNearMultiplier, $"{prefix}.{nameof(FogDistanceNightNearMultiplier)}");
+            ValidateNonNegative(FogDistanceNightFarMultiplier, $"{prefix}.{nameof(FogDistanceNightFarMultiplier)}");
         }
     }
 
